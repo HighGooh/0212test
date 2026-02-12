@@ -38,7 +38,7 @@ async def simple_send(email: str):
   # key = uuid.uuid4().hex
   id = ''.join(random.choices(string.digits, k=6))
   client.setex(id, 60*3, email)
-  # print(client.get(id))
+  print(client.get(id))
   html = f"""
     <h1>Login Service</h1>
     <p>3분 이내에 인증코드를 입력해주세요.</p>
