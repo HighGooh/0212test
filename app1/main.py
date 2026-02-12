@@ -6,7 +6,7 @@ import json
 import redis
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError, ExpiredSignatureError
-from db import findOne
+from db import findOne, findAll, save
 # from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
@@ -159,3 +159,25 @@ def logout(response: Response, request: Request):
         samesite="lax",
     )
     return {"status": True, "msg": "로그아웃 완료"}
+
+class SignupModel(BaseModel):
+    name: str
+    email: str
+    gender: bool
+
+@app.post("/checkemail")
+def checkemail(model: EmailModel):
+  sql = f"SELECT `email` from test.user WHERE `email` = '{model.email}' "
+  checkemail = findOne(sql)
+  if checkemail:
+    return {"status": False, "msg": "중복된 이메일입니다."}
+  else:
+    return {"status": True, "msg": "사용 가능한 이메일입니다."}
+
+@app.post("/signup")
+def signup(model: SignupModel):
+  sql = f"insert into test.user (`name`,`email`,`gender`) VALUE ('{model.name}','{model.email}', {model.gender})"
+  data = save(sql)
+  if data:
+    return {"status": True, "msg": "회원 가입을 축하합니다. 로그인 페이지로 이동합니다."}
+  return {"status": False, "msg": "가입 중 오류가 발생했습니다."}
