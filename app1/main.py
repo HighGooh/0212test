@@ -19,6 +19,9 @@ class EmailModel(BaseModel):
 class CodeModel(BaseModel):
   code: str
 
+class boardModel(BaseModel):
+    title: str
+    content: str
 
 def set_token(email: str):
   try:
@@ -160,6 +163,27 @@ def logout(response: Response, request: Request):
     )
     return {"status": True, "msg": "로그아웃 완료"}
 
+@app.post("/boardadd")
+def boardadd(boardmodel:boardModel, request:Request):
+        id = request.cookies.get("user")
+        try:
+              if id :
+                token = client.get(id)
+                data = jwt.decode(token,settings.secret_key,algorithms=settings.algorithm)
+                sql = f'''
+                SELECT * FROM `test`.user where `no` = '{data["sub"]}'
+                '''
+                userInfo = findOne(sql)
+                sql =  f"""
+                  INSERT INTO test.board (`userEmail`,`title`,`content`)
+                  VALUES ('{userInfo["email"]}','{boardmodel.title}','{boardmodel.content}');
+                  """
+                save(sql)
+                return {"status" : True, "msg":"게시글이 작성되었습니다."}
+        except JWTError as e :
+          print(f"실패원인: {e}")
+        return {"status": False, "msg": "로그인을 확인해주세요."}
+  
 class SignupModel(BaseModel):
     name: str
     email: str
