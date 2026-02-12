@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { api } from '@utils/network.js'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate} from 'react-router'
 
 const Home = () => {
     const nav = useNavigate()
