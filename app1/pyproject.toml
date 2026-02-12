@@ -8,6 +8,8 @@ dependencies = [
     "fastapi-mail>=1.6.1",
     "fastapi[standard]>=0.128.8",
     "kafka-python>=2.3.0",
+    "mariadb>=1.1.14",
     "pydantic-settings>=2.12.0",
+    "python-jose>=3.5.0",
     "redis>=7.1.1",
 ]
