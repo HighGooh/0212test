@@ -1,4 +1,14 @@
+import { useEffect, useState } from "react"
+import { api } from '@utils/network.js'
+import {useNavigate} from 'react-router'
+
 const Home = () => {
+    const nav = useNavigate()
+    const [list, setList] = useState([])
+    useEffect(() => {
+        api.get('/getList').then(res => setList([...res.data.boardList]))
+    }, [])
+
     return (
         <>
             <div className="container mt-3">
@@ -22,30 +32,16 @@ const Home = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="cursor-pointer" onClick>
-                            <td>1</td>
-                            <td>샘플을 만들었어요</td>
-                            <td>2026.02.08</td>
-                            <td>최수아</td>
-                        </tr>
-                        <tr className="cursor-pointer" onClick>
-                            <td>2</td>
-                            <td>가영이는 귀염둥이에용 헤헷콩-!</td>
-                            <td>2026.02.08</td>
-                            <td>최가영</td>
-                        </tr>
-                        <tr className="cursor-pointer" onClick>
-                            <td>3</td>
-                            <td>샘플을 만들었어요</td>
-                            <td>2026.02.08</td>
-                            <td>최윤우</td>
-                        </tr>
-                        <tr className="cursor-pointer" onClick>
-                            <td>4</td>
-                            <td>응애</td>
-                            <td>2026.02.08</td>
-                            <td>지환애긩</td>
-                        </tr>
+                        {
+                            list.map((v,i)=>
+                            <tr className="cursor-pointer" key={i} onClick={()=>nav(`/boardview/${v.no}`)}>
+                                <td>{i+1}</td>
+                                <td>{v.title}</td>
+                                <td>{v.regDate}</td>
+                                <td>{v.name}</td>
+                            </tr>
+                            )
+                        }
                     </tbody>
                 </table>
 
@@ -61,7 +57,7 @@ const Home = () => {
                         <li className="page-item"><button className="page-link">2</button></li>
                         <li className="page-item"><button className="page-link">3</button></li>
                         <li className="page-item">
-                            <button className="page-link"aria-label="Next">
+                            <button className="page-link" aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </button>
                         </li>
