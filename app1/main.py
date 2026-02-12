@@ -9,7 +9,9 @@ from jose import jwt, JWTError, ExpiredSignatureError
 from db import findOne, findAll, save
 # from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import uuid
+from pathlib import Path
 
 # security = HTTPBearer()
 
@@ -82,6 +84,8 @@ client = redis.Redis(
 
 origins = [ "http://localhost","http://localhost:5173" ]
 
+UPLOAD_DIR = Path("uploads")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -144,7 +148,12 @@ def me(request : Request):
     token = client.get(id)
     data = jwt.decode(token,settings.secret_key,algorithms=settings.algorithm)
     sql = f'''
-    SELECT * FROM `test`.user where `no` = '{data["sub"]}'
+            SELECT  u.`no`, u.`name`, u.`email`, u.`gender`, u.`delYn`,
+            DATE_FORMAT(u.regDate, '%Y-%m-%d') as regDate, 
+            DATE_FORMAT(u.modDate, '%Y-%m-%d %H:%i:%s') as modDate,
+            ifnull(u.profileNo, 0) AS profileNo
+            FROM `test`.user AS u
+            where u.`no` = '{data["sub"]}'
     '''
     userInfo = findOne(sql)
     return {"status": True, "user" : userInfo}
@@ -163,6 +172,17 @@ def logout(response: Response, request: Request):
     )
     return {"status": True, "msg": "로그아웃 완료"}
 
+@app.get("/profile")
+def profile(no: str):
+  sql = f"select `fileName` from `test`.`profile` where `no` = {no}"
+  result = findOne(sql)
+  if result:
+    fileName = result["fileName"]
+  if fileName:
+    UPLOAD_DIR.mkdir(exist_ok=True)
+    path = UPLOAD_DIR / fileName
+    return FileResponse(path=path)
+  return {"status": False}
 @app.post("/boardadd")
 def boardadd(boardmodel:boardModel, request:Request):
         id = request.cookies.get("user")
